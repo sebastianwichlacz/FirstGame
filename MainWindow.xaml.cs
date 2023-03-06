@@ -1,7 +1,9 @@
-﻿using Omu.ValueInjecter;
+﻿using NAudio.Wave;
+using Omu.ValueInjecter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -14,6 +16,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+
 
 namespace GameWPF
 {
@@ -39,10 +42,19 @@ namespace GameWPF
         int damage = 0;
         int enemySpeed = 10;
 
+        SoundPlayer kill = new SoundPlayer("E:\\Moje\\Programowanie\\aa\\GameWPF\\GameWPF\\Assets\\kill.wav");
+        //SoundPlayer theme = new SoundPlayer("E:\\Moje\\Programowanie\\aa\\GameWPF\\GameWPF\\Assets\\theme.wav");
+
+        AudioFileReader audioFile = new AudioFileReader("E:\\Moje\\Programowanie\\aa\\GameWPF\\GameWPF\\Assets\\theme.wav");
+        WaveOutEvent output = new WaveOutEvent();
+        
+
         Rect playerHitBox;
 
         public MainWindow()
         {
+
+
             InitializeComponent();
 
             timer.Interval = TimeSpan.FromMilliseconds(20);
@@ -62,8 +74,14 @@ namespace GameWPF
             ImageBrush playerImage = new ImageBrush();
             playerImage.ImageSource = new BitmapImage(new Uri("pack://application:,,,/Assets/player.png"));
             player.Fill = playerImage;
-
+            output.Init(audioFile);
+            output.Play();
         }
+
+
+
+
+        // Game loop//
 
         private void GameLoop(object sender, EventArgs e)
         {
@@ -127,6 +145,8 @@ namespace GameWPF
                             {
                                 itemRemover.Add(y);
                                 itemRemover.Add(x);
+                                kill.Play();
+
                                 score++;
                             }
                         }
@@ -161,6 +181,8 @@ namespace GameWPF
                 myCanvas.Children.Remove(i);
             }
 
+            // Conditions
+
             if (score > 5)
             {
                 limit = 20;
@@ -171,7 +193,7 @@ namespace GameWPF
             }
             if (score > 50)
             {
-                limit = 1;
+                limit = 1 ;
             }
 
 
@@ -182,12 +204,15 @@ namespace GameWPF
                 damageText.Foreground = Brushes.Red;
                 MessageBox.Show("Następnym razem postaraj się bardziej." + Environment.NewLine + "Twój wynik to: " + score, "Sebek pozdrawia");
 
-                System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
+                 System.Diagnostics.Process.Start(Application.ResourceAssembly.Location);
+
                 Application.Current.Shutdown();
             }
 
 
         }
+
+        // Methot to rotate bullet
 
         private void rotateBullet(Rectangle rect, int i)
         {
@@ -208,7 +233,7 @@ namespace GameWPF
             i++;
         }
 
-
+        // Method to craft new weapon
         private void craftWeapon(int a, int type)
         {
             Rectangle newBullet = new Rectangle
@@ -289,6 +314,7 @@ namespace GameWPF
 
         }
 
+        // What happens when relase key
         private void myCanvas_KeyUp(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.A)
@@ -301,7 +327,8 @@ namespace GameWPF
             }
             if (e.Key == Key.Space)
             {
-
+                
+                
                 if (score < 10)
                 {
 
@@ -330,7 +357,7 @@ namespace GameWPF
             }
 
         }
-
+         // What happens when press key
         private void myCanvas_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.A)
@@ -344,6 +371,7 @@ namespace GameWPF
 
         }
 
+        // Method to create enemies
         private void MakeEnemies()
         {
             ImageBrush enemySprite = new ImageBrush();
